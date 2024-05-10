@@ -56,19 +56,38 @@ def loss_and_gradients(x, y, params):
     # YOU CODE HERE
     probs = classifier_output(x, params)
     loss = -np.log(probs[y]) 
-    probs_copy = probs.copy()
-    probs_copy[y] -= 1
-    gW = np.outer(x, probs_copy)
-    gb = probs_copy
-    return loss, [gW, gb]
+def loss_and_gradients(x, y, params):
+    """
+    Compute the loss and the gradients at point x with given parameters.
+    y is a scalar indicating the correct label.
+
+    returns:
+        loss,[gW,gb]
+
+    loss: scalar
+    gW: matrix, gradients of W
+    gb: vector, gradients of b
+    """
+    W,b = params
+    # YOU CODE HERE
+    probs = classifier_output(x, params)
+    loss = -np.log(probs[y]) 
+
+    y_one_hot = np.zeros_like(probs)  
+    y_one_hot[y] = 1
+   
+    dW = np.outer(x, (probs - y_one_hot))  
+    db = probs - y_one_hot 
+
+    return loss, [dW, db]
 
 def create_classifier(in_dim, out_dim):
     """
     returns the parameters (W,b) for a log-linear classifier
     with input dimension in_dim and output dimension out_dim.
     """
-    W = np.zeros((in_dim, out_dim))
-    b = np.zeros(out_dim)
+    W = np.random.rand(in_dim, out_dim)
+    b = np.random.rand(out_dim)
     return [W,b]
 
 if __name__ == '__main__':

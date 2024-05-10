@@ -1,11 +1,12 @@
 # This file provides code which you may or may not find helpful.
 # Use it if you want, or ignore it.
 import random
-def read_data(fname):
+def read_data(filename):
     data = []
-    for line in file(fname):
-        label, text = line.strip().lower().split("\t",1)
-        data.append((label, text))
+    with open(filename, 'r', encoding='utf-8') as file:
+        for line in file:
+            label, text = line.strip().split('\t')
+            data.append((label, text))
     return data
 
 def text_to_bigrams(text):

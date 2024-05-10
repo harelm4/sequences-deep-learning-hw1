@@ -2,29 +2,35 @@ import loglinear as ll
 import random
 import numpy as np
 
+from utils import *
+
 STUDENT={'name': 'Harel Moshayof',
          'ID': '315073510'}
 
-def feats_to_vec(features):
+def feats_to_vec(text):
     # YOUR CODE HERE.
-    # Should return a numpy vector of features.
-    print(features)
-    # vec = np.zeros(len(utils.vocab))
-    # for bigram in features:
-    #     idx = utils.bigram_index[bigram]
-    #     vec[idx] += 1
-    return None
+    vec = np.zeros(len(F2I))  
+    for i in range(len(text)):
+        bigram= text[i:i+2]
+        if bigram in F2I.keys():  
+            vec[F2I[bigram]] += 1  
+    return vec
+
 
 
 def accuracy_on_dataset(dataset, params):
     good = bad = 0.0
     for label, features in dataset:
         # YOUR CODE HERE
-        # Compute the accuracy (a scalar) of the current parameters
-        # on the dataset.
-        # accuracy is (correct_predictions / all_predictions)
-        pass
+        x = feats_to_vec(features)
+        y = L2I[label]  
+        pred = ll.predict(x, params)
+        if pred == y:
+            good += 1
+        else:
+            bad+=1
     return good / (good + bad)
+
 
 def train_classifier(train_data, dev_data, num_iterations, learning_rate, params):
     """
@@ -41,13 +47,15 @@ def train_classifier(train_data, dev_data, num_iterations, learning_rate, params
         random.shuffle(train_data)
         
         for label, features in train_data:
-            x = feats_to_vec(features) # convert features to a vector.
-            y = label                  # convert the label to number if needed.
+            x = feats_to_vec(features) 
+            y = L2I[label]                
             loss, grads = ll.loss_and_gradients(x,y,params)
             cum_loss += loss
             # YOUR CODE HERE
             # update the parameters according to the gradients
             # and the learning rate.
+            for j in range(len(params)):
+                params[j] -= learning_rate * grads[j]
 
         train_loss = cum_loss / len(train_data)
         train_accuracy = accuracy_on_dataset(train_data, params)
@@ -56,38 +64,20 @@ def train_classifier(train_data, dev_data, num_iterations, learning_rate, params
     return params
 
 
-def _generate_bigrams(seq):
-    """
-    Generate bigrams from a list of words.
-    """
-    bigrams = []
-    for i in range(len(seq) - 1):
-        bigram = (seq[i:i+2], seq[i + 2:i+4])
-        bigrams.append(bigram)
-    return bigrams
-
-def _read_data(filename):
-    data = []
-    with open(filename, 'r', encoding='utf-8') as file:
-        for line in file:
-            label, text = line.strip().split('\t')
-            data.append((label, _generate_bigrams(text)))
-    return data
 
 
 if __name__ == '__main__':
     # YOUR CODE HERE
     # write code to load the train and dev sets, set up whatever you need,
     # and call train_classifier.
-    train_data = _read_data('train')
-    print(train_data[0])
-    dev_data = _read_data('dev')
-    num_iterations=10
-    learning_rate= 1e-5
-    in_dim=10
-    out_dim=10
+    train_data = read_data("train")
+    dev_data = read_data("dev")
+    num_iterations = 50
+    learning_rate= 0.001
+    in_dim = len(F2I)
+    out_dim = len(L2I)
     # ...
    
-    # params = ll.create_classifier(in_dim, out_dim)
-    # trained_params = train_classifier(train_data, dev_data, num_iterations, learning_rate, params)
+    params = ll.create_classifier(in_dim, out_dim)
+    trained_params = train_classifier(train_data, dev_data, num_iterations, learning_rate, params)
 
